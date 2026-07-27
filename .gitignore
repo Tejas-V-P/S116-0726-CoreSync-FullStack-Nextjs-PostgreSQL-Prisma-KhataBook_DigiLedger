@@ -1,0 +1,111 @@
+# ========================
+# Node.js (Both frontend & backend)
+# ========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnp
+.pnp.js
+
+# ========================
+# Environment Variables
+# ========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ========================
+# Frontend (Next.js / Vite / React)
+# ========================
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.vercel/
+frontend/.turbo/
+
+# ========================
+# Backend (Express / Node)
+# ========================
+backend/dist/
+backend/build/
+backend/.cache/
+
+# ========================
+# Prisma
+# ========================
+backend/prisma/generated/
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+*.log.*
+lerna-debug.log*
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ========================
+# Editor / IDE
+# ========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+.history/
+
+# ========================
+# Testing & Coverage
+# ========================
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+
+# ========================
+# Build & Cache
+# ========================
+.cache/
+.tmp/
+tmp/
+.turbo/
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# Miscellaneous
+# ========================
+*.pem
+*.key
+*.cert
+.vercel
+.netlify
