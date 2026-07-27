@@ -1,0 +1,24 @@
+{
+  "name": "s116-0726-coresync-fullstack-nextjs-postgresql-prisma-khatabook_digiledger",
+  "version": "1.0.0",
+  "description": "A digital ledger application for shopkeepers to manage credit/debit transactions with real-time balance updates, full audit trails, and concurrency locking.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kalviumcommunity/S116-0726-CoreSync-FullStack-Nextjs-PostgreSQL-Prisma-KhataBook_DigiLedger.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kalviumcommunity/S116-0726-CoreSync-FullStack-Nextjs-PostgreSQL-Prisma-KhataBook_DigiLedger/issues"
+  },
+  "homepage": "https://github.com/kalviumcommunity/S116-0726-CoreSync-FullStack-Nextjs-PostgreSQL-Prisma-KhataBook_DigiLedger#readme",
+  "dependencies": {
+    "concurrently": "^10.0.4"
+  }
+}
