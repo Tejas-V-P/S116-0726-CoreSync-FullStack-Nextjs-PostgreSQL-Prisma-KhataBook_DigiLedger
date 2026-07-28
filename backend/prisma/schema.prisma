@@ -1,9 +1,8 @@
 // Khatabook Digital Ledger Backend - Prisma Schema
-// Database models for transaction management with audit trails
+// Database models for transaction management, shopkeepers, locks, audit trails, customers, and suppliers
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -28,15 +27,18 @@ model User {
 
 // Shopkeeper model - Ledger owner (linked to User)
 model Shopkeeper {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId        String    @db.Uuid
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String            @db.Uuid
   name          String
-  email         String    @unique
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  email         String            @unique
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
 
-  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions  Transaction[]
+  locks         TransactionLock[]
+  customers     Customer[]
+  suppliers     Supplier[]
 
   @@index([userId])
   @@map("shopkeepers")
@@ -44,23 +46,77 @@ model Shopkeeper {
 
 // Transaction model - Individual financial records
 model Transaction {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  shopkeeperId  String    @db.Uuid
-  amount        Decimal   @db.Decimal(19, 2)
-  type          String    // DEBIT | CREDIT
-  description   String    @db.VarChar(500)
-  version       Int       @default(1)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shopkeeperId  String           @db.Uuid
+  amount        Decimal          @db.Decimal(19, 4)
+  type          String           // DEBIT | CREDIT
+  description   String           @db.VarChar(500)
+  version       Int              @default(1)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  deletedAt     DateTime?        @map("deleted_at")
 
-  shopkeeper    Shopkeeper @relation(fields: [shopkeeperId], references: [id], onDelete: Cascade)
+  shopkeeper    Shopkeeper       @relation(fields: [shopkeeperId], references: [id], onDelete: Cascade)
   auditLogs     AuditLog[]
+  lock          TransactionLock?
 
   @@index([shopkeeperId, createdAt(sort: Desc)])
   @@index([shopkeeperId, deletedAt])
   @@index([deletedAt])
   @@map("transactions")
+}
+
+// TransactionLock model - Pessimistic concurrency control
+model TransactionLock {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  transactionId  String      @unique @db.Uuid
+  shopkeeperId   String      @db.Uuid
+  acquiredAt     DateTime    @default(now())
+  expiresAt      DateTime
+
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  shopkeeper     Shopkeeper  @relation(fields: [shopkeeperId], references: [id], onDelete: Cascade)
+
+  @@map("transaction_locks")
+}
+
+// Customer model - Shopkeeper's customer records
+model Customer {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shopkeeperId   String      @db.Uuid
+  name           String
+  email          String
+  phone          String
+  address        String?
+  totalPurchased Decimal     @default(0) @db.Decimal(19, 2)
+  lastOrder      DateTime?
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  shopkeeper     Shopkeeper  @relation(fields: [shopkeeperId], references: [id], onDelete: Cascade)
+
+  @@index([shopkeeperId])
+  @@map("customers")
+}
+
+// Supplier model - Shopkeeper's supplier records
+model Supplier {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shopkeeperId   String      @db.Uuid
+  name           String
+  email          String
+  phone          String
+  company        String?
+  category       String?
+  totalSupplied  Decimal     @default(0) @db.Decimal(19, 2)
+  status         String      @default("Active")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  shopkeeper     Shopkeeper  @relation(fields: [shopkeeperId], references: [id], onDelete: Cascade)
+
+  @@index([shopkeeperId])
+  @@map("suppliers")
 }
 
 // AuditLog model - Complete history of transaction modifications
@@ -75,6 +131,7 @@ model AuditLog {
   timestamp      DateTime @default(now())
 
   transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([transactionId])
   @@index([timestamp(sort: Desc)])
