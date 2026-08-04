@@ -1,9 +1,6 @@
 /**
  * Error Handling Middleware
- * Centralizes error handling and response formatting
- *
- * Task: 14
- * Requirements: 13.1-13.5
+ * Centralizes error handling and standardized response formatting
  */
 
 /**
@@ -15,54 +12,76 @@
  * @param {object} res - Express response object
  */
 export function handleError(error, req, res) {
-  console.error('Error:', error);
+  console.error('API Error:', error);
 
-  // Validation error (400)
-  if (error.name === 'ValidationError' || error.statusCode === 400) {
-    return res.status(400).json({
-      error: 'Validation failed',
-      fields: error.fields || { general: error.message },
-    });
-  }
-
-  // Conflict error (409)
-  if (error.name === 'ConflictError' || error.statusCode === 409) {
-    return res.status(409).json({
-      error: error.message || 'Resource conflict',
+  // App Error / Validation Error with status code
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({
+      success: false,
+      error: error.message || 'Error',
+      message: error.message || 'An error occurred',
+      fields: error.fields || undefined,
       ...(error.context && error.context),
     });
   }
 
-  // Not found error (404)
-  if (error.name === 'NotFoundError' || error.statusCode === 404) {
-    return res.status(404).json({
-      error: error.message || 'Resource not found',
+  // Validation error by name (400)
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation failed',
+      message: error.fields ? Object.values(error.fields).filter(Boolean).join(', ') : error.message,
+      fields: error.fields || { general: error.message },
     });
   }
 
-  // Database error (500)
+  // Conflict error by name (409)
+  if (error.name === 'ConflictError') {
+    return res.status(409).json({
+      success: false,
+      error: 'Conflict',
+      message: error.message || 'Resource conflict',
+      ...(error.context && error.context),
+    });
+  }
+
+  // Not found error by name (404)
+  if (error.name === 'NotFoundError') {
+    return res.status(404).json({
+      success: false,
+      error: 'Not Found',
+      message: error.message || 'Resource not found',
+    });
+  }
+
+  // Prisma Database error (400/500)
   if (
     error.name === 'PrismaClientKnownRequestError' ||
     error.name === 'PrismaClientValidationError'
   ) {
     console.error('Database error:', error);
+    // P2002: Unique constraint failed
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0] || 'field';
+      return res.status(400).json({
+        success: false,
+        error: 'Duplicate record',
+        message: `An account or record with this ${field} already exists.`,
+      });
+    }
+
     return res.status(500).json({
-      error: 'Database operation failed',
-      message: 'An error occurred while processing your request',
+      success: false,
+      error: 'Database error',
+      message: error.message || 'An error occurred while processing your database request',
     });
   }
 
   // Default server error (500)
-  if (error.statusCode >= 500 || !error.statusCode) {
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred',
-    });
-  }
-
-  // Unknown error
-  return res.status(error.statusCode || 500).json({
-    error: error.message || 'An error occurred',
+  return res.status(500).json({
+    success: false,
+    error: 'Server error',
+    message: error.message || 'An unexpected server error occurred',
   });
 }
 
@@ -70,7 +89,7 @@ export function handleError(error, req, res) {
  * Error class for application-specific errors
  */
 export class AppError extends Error {
-  constructor(message, statusCode, context = {}) {
+  constructor(message, statusCode = 500, context = {}) {
     super(message);
     this.statusCode = statusCode;
     this.context = context;
@@ -83,9 +102,10 @@ export class AppError extends Error {
  */
 export class ValidationError extends AppError {
   constructor(fields = {}) {
-    super('Validation failed', 400);
+    const msg = typeof fields === 'string' ? fields : Object.values(fields).filter(Boolean).join(', ') || 'Validation failed';
+    super(msg, 400);
     this.name = 'ValidationError';
-    this.fields = fields;
+    this.fields = typeof fields === 'object' ? fields : { general: fields };
   }
 }
 
@@ -112,9 +132,6 @@ export class NotFoundError extends AppError {
 
 /**
  * Async error wrapper - wraps async route handlers to catch errors
- *
- * @param {function} fn - Async route handler function
- * @returns {function} Wrapped handler that catches errors
  */
 export function asyncHandler(fn) {
   return (req, res, next) => {
@@ -124,12 +141,6 @@ export function asyncHandler(fn) {
 
 /**
  * Express error handling middleware
- * Place this AFTER all other middleware and routes
- *
- * @param {Error} err - Error object
- * @param {object} req - Express request
- * @param {object} res - Express response
- * @param {function} next - Express next function
  */
 export function errorHandlingMiddleware(err, req, res, next) {
   handleError(err, req, res);
