@@ -8,6 +8,9 @@ let prisma;
  */
 export function getPrisma() {
   if (!prisma) {
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/khatabook_db?schema=public';
+    }
     prisma = new PrismaClient({
       log: process.env.NODE_ENV === 'development' 
         ? ['query', 'error', 'warn'] 
@@ -31,8 +34,8 @@ export async function initializeDatabase() {
     console.log('✓ Database connection successful');
     return db;
   } catch (error) {
-    console.error('✗ Database connection failed:', error.message);
-    process.exit(1);
+    console.warn('⚠️ Database connection check warning:', error.message);
+    throw error;
   }
 }
 
@@ -61,7 +64,7 @@ export async function runMigrations() {
     console.log('✓ Migrations completed');
   } catch (error) {
     console.error('✗ Migration failed:', error.message);
-    process.exit(1);
+    throw error;
   }
 }
 
@@ -86,7 +89,7 @@ export async function seedDatabase() {
       const testUser = await db.user.create({
         data: {
           email: 'demo@example.com',
-          password: '$2b$10$demo', // This is not a real bcrypt hash, just placeholder
+          password: '$2b$10$demo', // Placeholder hash
           name: 'Demo Shop',
           shopkeepers: {
             create: {
@@ -105,8 +108,7 @@ export async function seedDatabase() {
     
     console.log('✓ Database seeding completed');
   } catch (error) {
-    console.error('✗ Seeding failed:', error.message);
-    // Don't exit, seeding is optional
+    console.error('✗ Seeding skipped/failed:', error.message);
   }
 }
 
@@ -123,7 +125,6 @@ export async function resetDatabase() {
     console.log('⚠️  Resetting database...');
     const db = getPrisma();
     
-    // Delete in order to avoid foreign key constraints
     await db.auditLog.deleteMany({});
     await db.transaction.deleteMany({});
     await db.shopkeeper.deleteMany({});

@@ -40,13 +40,14 @@ function validateTransactionInput({ amount, type, description, shopkeeperId }) {
  * POST /api/transactions
  */
 export async function createTransaction(req, res) {
-  const { shopkeeperId, amount, type, description, userId } = req.body;
+  const { shopkeeperId, amount, type, partyName, description, userId } = req.body;
   const actingUserId = userId || shopkeeperId; // Fallback if shopkeeper performs change
 
   validateTransactionInput({ amount, type, description, shopkeeperId });
 
   const numAmount = parseFloat(amount);
   const formattedType = type.toUpperCase();
+  const cleanPartyName = partyName ? partyName.trim() : null;
 
   // Execute creation and audit logging atomically inside a DB transaction
   const newTransaction = await db.$transaction(async (prisma) => {
@@ -56,6 +57,7 @@ export async function createTransaction(req, res) {
         shopkeeperId,
         amount: numAmount,
         type: formattedType,
+        partyName: cleanPartyName,
         description: description.trim(),
         version: 1,
       },
@@ -71,10 +73,11 @@ export async function createTransaction(req, res) {
         newValues: {
           amount: numAmount,
           type: formattedType,
+          partyName: cleanPartyName,
           description: description.trim(),
           version: 1,
         },
-        fieldsChanged: ['amount', 'type', 'description'],
+        fieldsChanged: ['amount', 'type', 'partyName', 'description'],
       },
     });
 
@@ -142,7 +145,7 @@ export async function listTransactions(req, res) {
  */
 export async function updateTransaction(req, res) {
   const { id } = req.params;
-  const { amount, type, description, userId, version: expectedVersion } = req.body;
+  const { amount, type, partyName, description, userId, version: expectedVersion } = req.body;
   const actingUserId = userId || req.body.shopkeeperId;
 
   if (!actingUserId) {
@@ -176,6 +179,7 @@ export async function updateTransaction(req, res) {
   // Validate fields if provided
   const updatedAmount = amount !== undefined ? parseFloat(amount) : parseFloat(existingTx.amount);
   const updatedType = type ? type.toUpperCase() : existingTx.type;
+  const updatedPartyName = partyName !== undefined ? (partyName ? partyName.trim() : null) : existingTx.partyName;
   const updatedDescription = description !== undefined ? description.trim() : existingTx.description;
 
   validateTransactionInput({
@@ -199,6 +203,11 @@ export async function updateTransaction(req, res) {
     fieldsChanged.push('type');
     oldValues.type = existingTx.type;
     newValues.type = updatedType;
+  }
+  if (existingTx.partyName !== updatedPartyName) {
+    fieldsChanged.push('partyName');
+    oldValues.partyName = existingTx.partyName;
+    newValues.partyName = updatedPartyName;
   }
   if (existingTx.description !== updatedDescription) {
     fieldsChanged.push('description');
@@ -226,6 +235,7 @@ export async function updateTransaction(req, res) {
       data: {
         amount: updatedAmount,
         type: updatedType,
+        partyName: updatedPartyName,
         description: updatedDescription,
         version: { increment: 1 },
       },

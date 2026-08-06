@@ -50,6 +50,7 @@ model Transaction {
   shopkeeperId  String           @db.Uuid
   amount        Decimal          @db.Decimal(19, 4)
   type          String           // DEBIT | CREDIT
+  partyName     String?          @db.VarChar(255)
   description   String           @db.VarChar(500)
   version       Int              @default(1)
   createdAt     DateTime         @default(now()) @map("created_at")
