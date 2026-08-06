@@ -137,10 +137,11 @@ export default function Dashboard() {
       {/* Toast Notification */}
       {toastMessage && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-medium border transition-all animate-bounce ${toastType === 'error'
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-medium border transition-all animate-bounce ${
+            toastType === 'error'
               ? 'bg-rose-500/10 text-rose-600 border-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40'
               : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40'
-            }`}
+          }`}
         >
           {toastMessage}
         </div>
@@ -191,8 +192,9 @@ export default function Dashboard() {
             </div>
             <div className="mt-4">
               <div
-                className={`text-3xl font-extrabold font-mono ${balanceData.balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
-                  }`}
+                className={`text-3xl font-extrabold font-mono ${
+                  balanceData.balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                }`}
               >
                 ₹{balanceData.balance.toFixed(2)}
               </div>

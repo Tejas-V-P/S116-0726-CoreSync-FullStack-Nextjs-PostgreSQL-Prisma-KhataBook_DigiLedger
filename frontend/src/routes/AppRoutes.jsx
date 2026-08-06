@@ -1,15 +1,55 @@
-import { Routes, Route } from "react-router-dom";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from '../pages/Login/Login';
+import Registration from '../pages/Registration/Registration';
+import Dashboard from '../pages/Dashboard/Dashboard';
+import Customers from '../pages/Customers/Customers';
+import Suppliers from '../pages/Suppliers/Suppliers';
 
-import Login from "../pages/Login/Login";
-import Dashboard from "../pages/Dashboard/Dashboard";
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
 
-function AppRoutes() {
+  if (!token && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Registration />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customers"
+        element={
+          <ProtectedRoute>
+            <Customers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suppliers"
+        element={
+          <ProtectedRoute>
+            <Suppliers />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
-
-export default AppRoutes;
