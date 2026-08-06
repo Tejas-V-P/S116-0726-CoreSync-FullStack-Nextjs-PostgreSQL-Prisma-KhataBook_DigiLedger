@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowUpRight, ArrowDownLeft, Lock } from 'lucide-react';
+import { X, ArrowUpRight, ArrowDownLeft, Lock, User } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -7,6 +7,7 @@ export default function TransactionForm({ transaction, user, onSubmit, onCancel,
   const isEditing = Boolean(transaction);
   const [type, setType] = useState(transaction?.type || 'CREDIT');
   const [amount, setAmount] = useState(transaction?.amount ? String(transaction.amount) : '');
+  const [partyName, setPartyName] = useState(transaction?.partyName || '');
   const [description, setDescription] = useState(transaction?.description || '');
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -69,6 +70,7 @@ export default function TransactionForm({ transaction, user, onSubmit, onCancel,
         userId: user.id || user.shopkeeperId,
         type,
         amount: parseFloat(amount),
+        partyName: partyName.trim(),
         description: description.trim(),
         version: transaction?.version,
       };
@@ -151,6 +153,23 @@ export default function TransactionForm({ transaction, user, onSubmit, onCancel,
               <ArrowDownLeft className="w-4 h-4" />
               DEBIT (Gave)
             </button>
+          </div>
+        </div>
+
+        {/* Person / Organization Name */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+            Person / Organization Name
+          </label>
+          <div className="relative">
+            <User className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="e.g. Ramesh Kumar or Acme Corp"
+              value={partyName}
+              onChange={(e) => setPartyName(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            />
           </div>
         </div>
 
