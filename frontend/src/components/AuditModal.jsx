@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, History, Clock, User } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../config/api';
 
 export default function AuditModal({ transactionId, onClose }) {
   const [logs, setLogs] = useState([]);

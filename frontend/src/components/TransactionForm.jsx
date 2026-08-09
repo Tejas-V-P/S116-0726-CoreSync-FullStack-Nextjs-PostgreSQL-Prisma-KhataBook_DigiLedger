@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowUpRight, ArrowDownLeft, Lock, User } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../config/api';
 
 export default function TransactionForm({ transaction, user, onSubmit, onCancel, onShowToast }) {
   const isEditing = Boolean(transaction);
