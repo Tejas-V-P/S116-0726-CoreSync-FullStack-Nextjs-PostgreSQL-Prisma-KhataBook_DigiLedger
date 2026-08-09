@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { Users, Plus, Edit2, Trash2, Mail, Phone, MapPin, X, ShoppingBag } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../../config/api';
 
 export default function Customers() {
   const navigate = useNavigate();
@@ -42,36 +42,44 @@ export default function Customers() {
   const fetchCustomers = async () => {
     if (!user) return;
     setLoading(true);
+    const storageKey = `khatabook_customers_${user.email || user.id}`;
     try {
       const res = await fetch(`${API_BASE}/customers?shopkeeperId=${user.shopkeeperId || user.id}`);
       const data = await res.json();
       if (res.ok) {
         setCustomers(data.data || []);
+        localStorage.setItem(storageKey, JSON.stringify(data.data || []));
       } else {
         throw new Error(data.error || 'Failed to fetch customers');
       }
     } catch (error) {
-      // Fallback mock data if server offline
-      setCustomers([
-        {
-          id: 'cust-1',
-          name: 'Retail Store A',
-          email: 'contact@retaila.com',
-          phone: '+91 98765 43210',
-          address: 'Bangalore, Karnataka',
-          totalPurchased: 65000,
-          lastOrder: '2024-07-18',
-        },
-        {
-          id: 'cust-2',
-          name: 'Shop B',
-          email: 'info@shopb.com',
-          phone: '+91 87654 32109',
-          address: 'Pune, Maharashtra',
-          totalPurchased: 42500,
-          lastOrder: '2024-07-16',
-        },
-      ]);
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setCustomers(JSON.parse(saved));
+      } else {
+        const defaultCusts = [
+          {
+            id: 'cust-1',
+            name: 'Retail Store A',
+            email: 'contact@retaila.com',
+            phone: '+91 98765 43210',
+            address: 'Bangalore, Karnataka',
+            totalPurchased: 65000,
+            lastOrder: '2024-07-18',
+          },
+          {
+            id: 'cust-2',
+            name: 'Shop B',
+            email: 'info@shopb.com',
+            phone: '+91 87654 32109',
+            address: 'Pune, Maharashtra',
+            totalPurchased: 42500,
+            lastOrder: '2024-07-16',
+          },
+        ];
+        setCustomers(defaultCusts);
+        localStorage.setItem(storageKey, JSON.stringify(defaultCusts));
+      }
     } finally {
       setLoading(false);
     }
@@ -95,6 +103,8 @@ export default function Customers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
+    const storageKey = `khatabook_customers_${user.email || user.id}`;
 
     try {
       const payload = {
@@ -121,12 +131,14 @@ export default function Customers() {
       setFormData({ name: '', email: '', phone: '', address: '', totalPurchased: 0 });
       fetchCustomers();
     } catch (error) {
-      // Local fallback edit
+      let updated;
       if (editingCustomer) {
-        setCustomers(customers.map((c) => (c.id === editingCustomer.id ? { ...formData, id: c.id } : c)));
+        updated = customers.map((c) => (c.id === editingCustomer.id ? { ...formData, id: c.id } : c));
       } else {
-        setCustomers([...customers, { ...formData, id: `cust-${Date.now()}`, lastOrder: new Date().toISOString() }]);
+        updated = [...customers, { ...formData, id: `cust-${Date.now()}`, lastOrder: new Date().toISOString() }];
       }
+      setCustomers(updated);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       showToast(editingCustomer ? 'Customer updated' : 'Customer added');
       setShowForm(false);
       setEditingCustomer(null);
@@ -149,12 +161,16 @@ export default function Customers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this customer?')) return;
 
+    const storageKey = `khatabook_customers_${user.email || user.id}`;
+
     try {
       await fetch(`${API_BASE}/customers/${id}`, { method: 'DELETE' });
       showToast('Customer deleted successfully');
       fetchCustomers();
     } catch (error) {
-      setCustomers(customers.filter((c) => c.id !== id));
+      const updated = customers.filter((c) => c.id !== id);
+      setCustomers(updated);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       showToast('Customer deleted');
     }
   };

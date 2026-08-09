@@ -6,7 +6,7 @@ import TransactionForm from '../../components/TransactionForm';
 import AuditModal from '../../components/AuditModal';
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../../config/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const fetchTransactions = async (page = 1) => {
     if (!user) return;
     setLoading(true);
+    const storageKey = `khatabook_txs_${user.email || user.id}`;
     try {
       const res = await fetch(
         `${API_BASE}/transactions?shopkeeperId=${user.shopkeeperId || user.id}&page=${page}&limit=10`
@@ -50,8 +51,13 @@ export default function Dashboard() {
       setTransactions(data.data || []);
       setCurrentPage(data.pagination?.page || 1);
       setTotalPages(data.pagination?.totalPages || 1);
+      localStorage.setItem(storageKey, JSON.stringify(data.data || []));
     } catch (error) {
       console.warn('Backend server offline or endpoint error:', error.message);
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setTransactions(JSON.parse(saved));
+      }
     } finally {
       setLoading(false);
     }

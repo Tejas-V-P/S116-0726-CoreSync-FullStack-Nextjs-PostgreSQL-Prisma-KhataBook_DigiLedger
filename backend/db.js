@@ -1,4 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 let prisma;
 
@@ -8,9 +14,6 @@ let prisma;
  */
 export function getPrisma() {
   if (!prisma) {
-    if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/khatabook_db?schema=public';
-    }
     prisma = new PrismaClient({
       log: process.env.NODE_ENV === 'development' 
         ? ['query', 'error', 'warn'] 
@@ -34,8 +37,9 @@ export async function initializeDatabase() {
     console.log('✓ Database connection successful');
     return db;
   } catch (error) {
-    console.warn('⚠️ Database connection check warning:', error.message);
-    throw error;
+    console.warn('⚠️  PostgreSQL Database Connection Warning:', error.message.split('\n')[0]);
+    console.warn('⚠️  Server will continue running in fallback mode. Update DATABASE_URL in backend/.env to connect PostgreSQL.');
+    return null;
   }
 }
 

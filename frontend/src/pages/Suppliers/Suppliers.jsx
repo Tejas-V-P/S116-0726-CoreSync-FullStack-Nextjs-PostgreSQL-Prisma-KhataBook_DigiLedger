@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { Truck, Plus, Edit2, Trash2, Mail, Phone, Building2, Tag, X } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../../config/api';
 
 export default function Suppliers() {
   const navigate = useNavigate();
@@ -43,37 +43,46 @@ export default function Suppliers() {
   const fetchSuppliers = async () => {
     if (!user) return;
     setLoading(true);
+    const storageKey = `khatabook_suppliers_${user.email || user.id}`;
     try {
       const res = await fetch(`${API_BASE}/suppliers?shopkeeperId=${user.shopkeeperId || user.id}`);
       const data = await res.json();
       if (res.ok) {
         setSuppliers(data.data || []);
+        localStorage.setItem(storageKey, JSON.stringify(data.data || []));
       } else {
         throw new Error(data.error || 'Failed to fetch suppliers');
       }
     } catch (error) {
-      setSuppliers([
-        {
-          id: 'sup-1',
-          name: 'Global Wholesalers Ltd',
-          email: 'orders@globalwholesalers.com',
-          phone: '+91 91234 56789',
-          company: 'Global Wholesalers',
-          category: 'FMCG Goods',
-          totalSupplied: 120000,
-          status: 'Active',
-        },
-        {
-          id: 'sup-2',
-          name: 'Apex Distributors',
-          email: 'sales@apexdist.com',
-          phone: '+91 81234 56789',
-          company: 'Apex Logistics',
-          category: 'Electronics',
-          totalSupplied: 85000,
-          status: 'Active',
-        },
-      ]);
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        setSuppliers(JSON.parse(saved));
+      } else {
+        const defaultSups = [
+          {
+            id: 'sup-1',
+            name: 'Global Wholesalers Ltd',
+            email: 'orders@globalwholesalers.com',
+            phone: '+91 91234 56789',
+            company: 'Global Wholesalers',
+            category: 'FMCG Goods',
+            totalSupplied: 120000,
+            status: 'Active',
+          },
+          {
+            id: 'sup-2',
+            name: 'Apex Distributors',
+            email: 'sales@apexdist.com',
+            phone: '+91 81234 56789',
+            company: 'Apex Logistics',
+            category: 'Electronics',
+            totalSupplied: 85000,
+            status: 'Active',
+          },
+        ];
+        setSuppliers(defaultSups);
+        localStorage.setItem(storageKey, JSON.stringify(defaultSups));
+      }
     } finally {
       setLoading(false);
     }
@@ -97,6 +106,8 @@ export default function Suppliers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
+    const storageKey = `khatabook_suppliers_${user.email || user.id}`;
 
     try {
       const payload = {
@@ -123,11 +134,14 @@ export default function Suppliers() {
       setFormData({ name: '', email: '', phone: '', company: '', category: 'General', totalSupplied: 0, status: 'Active' });
       fetchSuppliers();
     } catch (error) {
+      let updated;
       if (editingSupplier) {
-        setSuppliers(suppliers.map((s) => (s.id === editingSupplier.id ? { ...formData, id: s.id } : s)));
+        updated = suppliers.map((s) => (s.id === editingSupplier.id ? { ...formData, id: s.id } : s));
       } else {
-        setSuppliers([...suppliers, { ...formData, id: `sup-${Date.now()}` }]);
+        updated = [...suppliers, { ...formData, id: `sup-${Date.now()}` }];
       }
+      setSuppliers(updated);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       showToast(editingSupplier ? 'Supplier updated' : 'Supplier added');
       setShowForm(false);
       setEditingSupplier(null);
@@ -152,12 +166,16 @@ export default function Suppliers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this supplier?')) return;
 
+    const storageKey = `khatabook_suppliers_${user.email || user.id}`;
+
     try {
       await fetch(`${API_BASE}/suppliers/${id}`, { method: 'DELETE' });
       showToast('Supplier deleted successfully');
       fetchSuppliers();
     } catch (error) {
-      setSuppliers(suppliers.filter((s) => s.id !== id));
+      const updated = suppliers.filter((s) => s.id !== id);
+      setSuppliers(updated);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       showToast('Supplier deleted');
     }
   };

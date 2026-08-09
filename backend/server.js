@@ -1,18 +1,22 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import apiRouter from './routes/apiRouter.js';
 import { initializeDatabase, seedDatabase, healthCheck } from './db.js';
 import { errorHandlingMiddleware } from './middleware/errorHandler.js';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 
 // Configure Middleware
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
 app.use(cors({
-  origin: '*',
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -28,6 +32,18 @@ app.get('/health', async (req, res) => {
 // API Routes
 app.use('/api', apiRouter);
 
+// Serve static frontend files in combined production deployment mode
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+    if (err) next();
+  });
+});
+
 // Global Error Handler Middleware
 app.use(errorHandlingMiddleware);
 
@@ -38,14 +54,13 @@ async function startServer() {
     // Attempt DB connection
     console.log('📦 Connecting to database...');
     try {
-      await initializeDatabase();
+      const dbConnected = await initializeDatabase();
       const env = process.env.NODE_ENV || 'development';
-      if (env === 'development') {
+      if (dbConnected && env === 'development') {
         await seedDatabase();
       }
     } catch (dbError) {
-      console.warn('⚠️  Database connection failed or not configured yet:', dbError.message);
-      console.warn('⚠️  Continuing server launch...');
+      console.warn('⚠️  Continuing server launch in fallback mode...');
     }
 
     app.listen(PORT, () => {

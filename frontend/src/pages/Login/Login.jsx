@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle';
 
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
