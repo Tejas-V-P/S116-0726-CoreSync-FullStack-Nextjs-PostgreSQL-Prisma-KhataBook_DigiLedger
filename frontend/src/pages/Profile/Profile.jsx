@@ -199,7 +199,7 @@ export default function Profile() {
   const accountId = user.shopkeeperId || user.id || 'N/A';
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 selection:bg-indigo-500 selection:text-white">
       <Navbar user={user} />
 
       {/* Toast Notification Banner */}
@@ -208,14 +208,14 @@ export default function Profile() {
           <div
             className={`flex items-center space-x-3 px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md ${
               toast.type === 'success'
-                ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/40'
-                : 'bg-rose-950/90 text-rose-200 border-rose-500/40'
+                ? 'bg-emerald-50 text-emerald-900 border-emerald-300 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-500/40'
+                : 'bg-rose-50 text-rose-900 border-rose-300 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-500/40'
             }`}
           >
             {toast.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <AlertCircle className="w-5 h-5 text-rose-400" />
+              <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
             )}
             <span className="text-sm font-medium">{toast.message}</span>
           </div>
@@ -224,20 +224,20 @@ export default function Profile() {
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center space-x-3">
-              <User className="w-8 h-8 text-indigo-400" />
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center space-x-3">
+              <User className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
               <span>Account & Profile Settings</span>
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
               Manage your business profile details, unique transaction ID, and security credentials.
             </p>
           </div>
         </div>
 
         {/* Account Overview Header Card */}
-        <div className="bg-slate-800/80 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        <div className="bg-white border-slate-200/80 dark:bg-slate-900/80 dark:border-slate-800/80 backdrop-blur-xl border rounded-2xl p-6 sm:p-8 shadow-md dark:shadow-xl relative overflow-hidden transition-colors">
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -246,12 +246,12 @@ export default function Profile() {
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{user.name || 'Shopkeeper Account'}</h2>
-                <p className="text-slate-400 text-sm flex items-center space-x-1.5 mt-0.5">
-                  <Mail className="w-4 h-4 text-slate-500" />
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{user.name || 'Shopkeeper Account'}</h2>
+                <p className="text-slate-600 dark:text-slate-400 text-sm flex items-center space-x-1.5 mt-0.5">
+                  <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                   <span>{user.email}</span>
                 </p>
-                <div className="inline-flex items-center space-x-1.5 mt-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <div className="inline-flex items-center space-x-1.5 mt-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Verified Shopkeeper Ledger Account</span>
                 </div>
@@ -259,49 +259,49 @@ export default function Profile() {
             </div>
 
             {/* Account / Shopkeeper / Transaction ID Card */}
-            <div className="w-full md:w-auto bg-slate-900/90 border border-slate-700 rounded-xl p-4 flex flex-col space-y-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
-                <Key className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="w-full md:w-auto bg-slate-50 border-slate-200 dark:bg-slate-950/90 dark:border-slate-800 border rounded-xl p-4 flex flex-col space-y-2">
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                <Key className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span>Shopkeeper / Transaction Account ID</span>
               </span>
 
-              <div className="flex items-center space-x-3 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800 font-mono text-xs text-indigo-300">
+              <div className="flex items-center space-x-3 bg-white border-slate-200 dark:bg-slate-900 px-3 py-2 rounded-lg border dark:border-slate-800 font-mono text-xs text-indigo-700 dark:text-indigo-300">
                 <span className="truncate max-w-[240px] sm:max-w-[300px] select-all">{accountId}</span>
                 <button
                   onClick={() => handleCopyId(accountId)}
-                  className="p-1.5 hover:bg-slate-800 rounded-md text-slate-400 hover:text-white transition-all flex items-center space-x-1"
+                  className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all flex items-center space-x-1"
                   title="Copy Account ID"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
+                  {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-500">Unique identifier for audit logs & ledger synchronization.</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Unique identifier for audit logs & ledger synchronization.</p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form 1: Edit Business Details */}
-          <div className="bg-slate-800/80 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+          <div className="bg-white border-slate-200/80 dark:bg-slate-900/80 dark:border-slate-800/80 backdrop-blur-xl border rounded-2xl p-6 shadow-md dark:shadow-xl flex flex-col justify-between transition-colors">
             <div>
-              <div className="flex items-center space-x-3 border-b border-slate-700/60 pb-4 mb-6">
-                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
+              <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-700/60 pb-4 mb-6">
+                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Business Information</h3>
-                  <p className="text-xs text-slate-400">Update your public shopkeeper name and registered email</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Business Information</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Update your public shopkeeper name and registered email</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateProfile} className="space-y-5">
                 {/* Shopkeeper Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                     Shopkeeper / Business Name
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                       <User className="w-4 h-4" />
                     </div>
                     <input
@@ -309,21 +309,21 @@ export default function Profile() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Enter business or owner name"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border ${
-                        errors.name ? 'border-rose-500' : 'border-slate-700 focus:border-indigo-500'
-                      } text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all`}
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-900/90 border ${
+                        errors.name ? 'border-rose-500' : 'dark:border-slate-700 focus:border-indigo-500'
+                      } dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all`}
                     />
                   </div>
-                  {errors.name && <p className="text-rose-400 text-xs mt-1">{errors.name}</p>}
+                  {errors.name && <p className="text-rose-500 text-xs mt-1">{errors.name}</p>}
                 </div>
 
                 {/* Email Address */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                     Email Address
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                       <Mail className="w-4 h-4" />
                     </div>
                     <input
@@ -331,12 +331,12 @@ export default function Profile() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@business.com"
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border ${
-                        errors.email ? 'border-rose-500' : 'border-slate-700 focus:border-indigo-500'
-                      } text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all`}
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-900/90 border ${
+                        errors.email ? 'border-rose-500' : 'dark:border-slate-700 focus:border-indigo-500'
+                      } dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all`}
                     />
                   </div>
-                  {errors.email && <p className="text-rose-400 text-xs mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-rose-500 text-xs mt-1">{errors.email}</p>}
                 </div>
 
                 <div className="pt-4">
@@ -360,26 +360,26 @@ export default function Profile() {
           </div>
 
           {/* Form 2: Security & Password Change */}
-          <div className="bg-slate-800/80 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+          <div className="bg-white border-slate-200/80 dark:bg-slate-900/80 dark:border-slate-800/80 backdrop-blur-xl border rounded-2xl p-6 shadow-md dark:shadow-xl flex flex-col justify-between transition-colors">
             <div>
-              <div className="flex items-center space-x-3 border-b border-slate-700/60 pb-4 mb-6">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
+              <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-700/60 pb-4 mb-6">
+                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
                   <Lock className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Security & Password</h3>
-                  <p className="text-xs text-slate-400">Update your account security and access credentials</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Security & Password</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Update your account security and access credentials</p>
                 </div>
               </div>
 
               <form onSubmit={handleChangePassword} className="space-y-4">
                 {/* Current Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                     Current Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                       <Lock className="w-4 h-4" />
                     </div>
                     <input
@@ -387,28 +387,28 @@ export default function Profile() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
-                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/90 border ${
-                        errors.currentPassword ? 'border-rose-500' : 'border-slate-700 focus:border-emerald-500'
-                      } text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
+                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-900/90 border ${
+                        errors.currentPassword ? 'border-rose-500' : 'dark:border-slate-700 focus:border-emerald-500'
+                      } dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
                     >
                       {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.currentPassword && <p className="text-rose-400 text-xs mt-1">{errors.currentPassword}</p>}
+                  {errors.currentPassword && <p className="text-rose-500 text-xs mt-1">{errors.currentPassword}</p>}
                 </div>
 
                 {/* New Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                     New Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                       <Key className="w-4 h-4" />
                     </div>
                     <input
@@ -416,28 +416,28 @@ export default function Profile() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Minimum 6 characters"
-                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/90 border ${
-                        errors.newPassword ? 'border-rose-500' : 'border-slate-700 focus:border-emerald-500'
-                      } text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
+                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-900/90 border ${
+                        errors.newPassword ? 'border-rose-500' : 'dark:border-slate-700 focus:border-emerald-500'
+                      } dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.newPassword && <p className="text-rose-400 text-xs mt-1">{errors.newPassword}</p>}
+                  {errors.newPassword && <p className="text-rose-500 text-xs mt-1">{errors.newPassword}</p>}
                 </div>
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
                     Confirm New Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
                     <input
@@ -445,19 +445,19 @@ export default function Profile() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Re-enter new password"
-                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-900/90 border ${
-                        errors.confirmPassword ? 'border-rose-500' : 'border-slate-700 focus:border-emerald-500'
-                      } text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
+                      className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border-slate-300 text-slate-900 dark:bg-slate-900/90 border ${
+                        errors.confirmPassword ? 'border-rose-500' : 'dark:border-slate-700 focus:border-emerald-500'
+                      } dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.confirmPassword && <p className="text-rose-400 text-xs mt-1">{errors.confirmPassword}</p>}
+                  {errors.confirmPassword && <p className="text-rose-500 text-xs mt-1">{errors.confirmPassword}</p>}
                 </div>
 
                 <div className="pt-2">
