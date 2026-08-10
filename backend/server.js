@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 // Configure Middleware
-const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => callback(null, true),
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 app.use(express.json());
