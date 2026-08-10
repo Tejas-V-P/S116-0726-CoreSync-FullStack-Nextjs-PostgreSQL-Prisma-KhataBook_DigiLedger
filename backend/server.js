@@ -35,13 +35,16 @@ app.use('/api', apiRouter);
 // Serve static frontend files in combined production deployment mode
 const frontendDistPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDistPath));
-app.get('*', (req, res, next) => {
+app.use((req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
     return next();
   }
-  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
-    if (err) next();
-  });
+  if (req.method === 'GET') {
+    return res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+      if (err) next();
+    });
+  }
+  next();
 });
 
 // Global Error Handler Middleware
