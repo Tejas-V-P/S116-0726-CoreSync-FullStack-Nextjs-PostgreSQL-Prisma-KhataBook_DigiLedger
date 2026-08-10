@@ -78,10 +78,20 @@ export default function Navbar({ user }) {
                         <ThemeToggle />
 
                         {user && (
-                            <div className="hidden md:flex items-center space-x-2 bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <NavLink
+                                to="/profile"
+                                className={({ isActive }) =>
+                                    `flex items-center space-x-2 px-3 py-1.5 rounded-lg border transition-all text-sm font-medium ${
+                                        isActive
+                                            ? 'bg-indigo-600/10 text-indigo-600 border-indigo-500/30 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
+                                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                                    }`
+                                }
+                                title="Manage Account & Profile Settings"
+                            >
                                 <User className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-                                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{user.name || user.email}</span>
-                            </div>
+                                <span className="max-w-[120px] sm:max-w-[160px] truncate">{user.name || user.email}</span>
+                            </NavLink>
                         )}
 
                         <button

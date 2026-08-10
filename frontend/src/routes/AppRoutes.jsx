@@ -5,6 +5,7 @@ import Registration from '../pages/Registration/Registration';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Customers from '../pages/Customers/Customers';
 import Suppliers from '../pages/Suppliers/Suppliers';
+import Profile from '../pages/Profile/Profile';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -45,6 +46,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute>
             <Suppliers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />

@@ -42,6 +42,7 @@ export const router = express.Router();
 router.post('/auth/register', asyncHandler(register));
 router.post('/auth/login', asyncHandler(login));
 router.get('/auth/me', asyncHandler(getCurrentUser));
+router.put('/auth/profile', asyncHandler(updateProfile));
 
 // Transaction Endpoints
 router.post('/transactions', asyncHandler(createTransaction));

@@ -150,8 +150,105 @@ export async function getCurrentUser(req, res) {
   }
 }
 
+/**
+ * PUT /api/auth/profile
+ */
+export async function updateProfile(req, res) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new AppError('Unauthorized', 401);
+  }
+
+  const token = authHeader.split(' ')[1];
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    throw new AppError('Invalid or expired token', 401);
+  }
+
+  const { name, email, currentPassword, newPassword } = req.body;
+
+  const existingUser = await db.user.findUnique({
+    where: { id: decoded.id },
+    include: { shopkeepers: true },
+  });
+
+  if (!existingUser) {
+    throw new AppError('User not found', 404);
+  }
+
+  // If email is changing, verify uniqueness
+  if (email && email.toLowerCase().trim() !== existingUser.email) {
+    const emailCheck = await db.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+    if (emailCheck) {
+      throw new AppError('An account with this email already exists', 400);
+    }
+  }
+
+  let updatedHashedPassword = existingUser.password;
+  if (newPassword) {
+    if (!currentPassword) {
+      throw new ValidationError({ currentPassword: 'Current password is required to change password' });
+    }
+    const isValid = await bcrypt.compare(currentPassword, existingUser.password);
+    if (!isValid) {
+      throw new AppError('Incorrect current password', 400);
+    }
+    if (newPassword.length < 6) {
+      throw new ValidationError({ newPassword: 'New password must be at least 6 characters' });
+    }
+    updatedHashedPassword = await bcrypt.hash(newPassword, 10);
+  }
+
+  const updatedName = name ? name.trim() : existingUser.name;
+  const updatedEmail = email ? email.toLowerCase().trim() : existingUser.email;
+
+  const result = await db.$transaction(async (prisma) => {
+    const updatedUser = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        name: updatedName,
+        email: updatedEmail,
+        password: updatedHashedPassword,
+      },
+    });
+
+    const shopkeeper = existingUser.shopkeepers[0];
+    let updatedShopkeeper = shopkeeper;
+    if (shopkeeper) {
+      updatedShopkeeper = await prisma.shopkeeper.update({
+        where: { id: shopkeeper.id },
+        data: {
+          name: updatedName,
+          email: updatedEmail,
+        },
+      });
+    }
+
+    return { user: updatedUser, shopkeeper: updatedShopkeeper || { id: updatedUser.id } };
+  });
+
+  const newToken = generateToken(result.user, result.shopkeeper);
+
+  return res.status(200).json({
+    success: true,
+    message: 'Profile updated successfully',
+    token: newToken,
+    user: {
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      shopkeeperId: result.shopkeeper.id,
+    },
+  });
+}
+
 export default {
   register,
   login,
   getCurrentUser,
+  updateProfile,
 };
