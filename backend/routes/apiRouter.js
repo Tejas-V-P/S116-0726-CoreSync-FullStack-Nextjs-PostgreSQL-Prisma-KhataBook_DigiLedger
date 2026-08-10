@@ -3,6 +3,7 @@ import {
   register,
   login,
   getCurrentUser,
+  updateProfile,
 } from '../api/auth.js';
 import {
   createTransaction,

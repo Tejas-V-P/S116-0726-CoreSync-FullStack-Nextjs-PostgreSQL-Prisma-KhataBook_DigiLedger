@@ -101,7 +101,13 @@ export default function Profile() {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = {};
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server returned status ${response.status}. Please check backend deployment logs.`);
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to update profile');
@@ -158,7 +164,13 @@ export default function Profile() {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data = {};
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server returned status ${response.status}. Please check backend deployment logs.`);
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to change password');
