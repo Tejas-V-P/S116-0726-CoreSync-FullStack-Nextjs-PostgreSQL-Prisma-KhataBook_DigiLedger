@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
 import { API_BASE } from '../../config/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   User,
   Mail,
@@ -20,12 +20,12 @@ import {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useAuth();
   const [copied, setCopied] = useState(false);
 
   // Form State
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(() => user?.name || '');
+  const [email, setEmail] = useState(() => user?.email || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,23 +42,11 @@ export default function Profile() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-
-    if (!token || !storedUser) {
-      navigate('/login');
-      return;
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
     }
-
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setName(parsedUser.name || '');
-      setEmail(parsedUser.email || '');
-    } catch (e) {
-      navigate('/login');
-    }
-  }, [navigate]);
+  }, [user]);
 
   const showNotification = (type, message) => {
     setToast({ type, message });
@@ -116,7 +104,6 @@ export default function Profile() {
       // Update local storage and state
       if (data.token) localStorage.setItem('token', data.token);
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
       }
 
@@ -178,7 +165,6 @@ export default function Profile() {
 
       if (data.token) localStorage.setItem('token', data.token);
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
       }
 
@@ -199,8 +185,7 @@ export default function Profile() {
   const accountId = user.shopkeeperId || user.id || 'N/A';
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 selection:bg-indigo-500 selection:text-white">
-      <Navbar user={user} />
+    <div className="pb-12">
 
       {/* Toast Notification Banner */}
       {toast && (

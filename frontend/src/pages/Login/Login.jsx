@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 
 import { API_BASE } from '../../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,8 +55,7 @@ export default function Login() {
         throw new Error(errMsg);
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      login(data.user, data.token);
 
       navigate('/dashboard');
     } catch (err) {
@@ -66,8 +67,7 @@ export default function Login() {
           name: email.split('@')[0],
           shopkeeperId: 'demo-shopkeeper-id',
         };
-        localStorage.setItem('token', 'demo-jwt-token');
-        localStorage.setItem('user', JSON.stringify(mockUser));
+        login(mockUser, 'demo-jwt-token');
         navigate('/dashboard');
         return;
       }

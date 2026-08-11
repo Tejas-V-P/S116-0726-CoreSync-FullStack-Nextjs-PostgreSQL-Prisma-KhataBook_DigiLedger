@@ -1,35 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
 import TransactionList from '../../components/TransactionList';
 import TransactionForm from '../../components/TransactionForm';
 import AuditModal from '../../components/AuditModal';
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 import { API_BASE } from '../../config/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [balanceData, setBalanceData] = useState({ balance: 0, totalCredits: 0, totalDebits: 0 });
-  const [transactions, setTransactions] = useState([]);
+  const { user } = useAuth();
+
+  const storageKey = user ? `khatabook_txs_${user.email || user.id}` : null;
+
+  const [transactions, setTransactions] = useState(() => {
+    if (!storageKey) return [];
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const [balanceData, setBalanceData] = useState(() => {
+    let totalCredits = 0;
+    let totalDebits = 0;
+    if (storageKey) {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const list = JSON.parse(saved);
+          list.forEach((tx) => {
+            if (tx.type === 'CREDIT') totalCredits += parseFloat(tx.amount) || 0;
+            if (tx.type === 'DEBIT') totalDebits += parseFloat(tx.amount) || 0;
+          });
+        }
+      } catch (e) {}
+    }
+    return { balance: totalCredits - totalDebits, totalCredits, totalDebits };
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => transactions.length === 0);
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [auditTransactionId, setAuditTransactionId] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-    setUser(JSON.parse(userData));
-  }, [navigate]);
 
   const showToast = (message, type = 'success') => {
     setToastMessage(message);
@@ -39,8 +59,8 @@ export default function Dashboard() {
 
   const fetchTransactions = async (page = 1) => {
     if (!user) return;
-    setLoading(true);
-    const storageKey = `khatabook_txs_${user.email || user.id}`;
+    if (transactions.length === 0) setLoading(true);
+    const key = `khatabook_txs_${user.email || user.id}`;
     try {
       const res = await fetch(
         `${API_BASE}/transactions?shopkeeperId=${user.shopkeeperId || user.id}&page=${page}&limit=10`
@@ -51,10 +71,10 @@ export default function Dashboard() {
       setTransactions(data.data || []);
       setCurrentPage(data.pagination?.page || 1);
       setTotalPages(data.pagination?.totalPages || 1);
-      localStorage.setItem(storageKey, JSON.stringify(data.data || []));
+      localStorage.setItem(key, JSON.stringify(data.data || []));
     } catch (error) {
       console.warn('Backend server offline or endpoint error:', error.message);
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem(key);
       if (saved) {
         setTransactions(JSON.parse(saved));
       }
@@ -137,8 +157,7 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-12 transition-colors duration-200">
-      <Navbar user={user} />
+    <div className="pb-12">
 
       {/* Toast Notification */}
       {toastMessage && (

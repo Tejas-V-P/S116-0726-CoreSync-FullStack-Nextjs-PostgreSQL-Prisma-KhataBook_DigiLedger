@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen, User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import ThemeToggle from '../../components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 
 import { API_BASE } from '../../config/api';
 
 export default function Registration() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -59,8 +61,7 @@ export default function Registration() {
         throw new Error(errMsg);
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      login(data.user, data.token);
 
       navigate('/dashboard');
     } catch (err) {
@@ -71,8 +72,7 @@ export default function Registration() {
           name: formData.username.trim(),
           shopkeeperId: 'demo-shopkeeper-id',
         };
-        localStorage.setItem('token', 'demo-jwt-token');
-        localStorage.setItem('user', JSON.stringify(mockUser));
+        login(mockUser, 'demo-jwt-token');
         navigate('/dashboard');
         return;
       }

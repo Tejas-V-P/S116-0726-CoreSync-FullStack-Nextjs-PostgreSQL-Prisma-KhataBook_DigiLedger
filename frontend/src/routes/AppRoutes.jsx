@@ -6,16 +6,17 @@ import Dashboard from '../pages/Dashboard/Dashboard';
 import Customers from '../pages/Customers/Customers';
 import Suppliers from '../pages/Suppliers/Suppliers';
 import Profile from '../pages/Profile/Profile';
+import MainLayout from '../components/MainLayout';
+import { useAuth } from '../context/AuthContext';
 
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem('token');
-  const user = localStorage.getItem('user');
+function ProtectedRoute() {
+  const { isAuthenticated } = useAuth();
 
-  if (!token && !user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <MainLayout />;
 }
 
 export default function AppRoutes() {
@@ -25,38 +26,12 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Registration />} />
 
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/customers"
-        element={
-          <ProtectedRoute>
-            <Customers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/suppliers"
-        element={
-          <ProtectedRoute>
-            <Suppliers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

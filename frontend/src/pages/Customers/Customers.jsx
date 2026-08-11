@@ -1,15 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
 import { Users, Plus, Edit2, Trash2, Mail, Phone, MapPin, X, ShoppingBag } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 import { API_BASE } from '../../config/api';
 
 export default function Customers() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const storageKey = user ? `khatabook_customers_${user.email || user.id}` : null;
+
+  const [customers, setCustomers] = useState(() => {
+    if (!storageKey) return [];
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      {
+        id: 'cust-1',
+        name: 'Retail Store A',
+        email: 'contact@retaila.com',
+        phone: '+91 98765 43210',
+        address: 'Bangalore, Karnataka',
+        totalPurchased: 65000,
+        lastOrder: '2024-07-18',
+      },
+      {
+        id: 'cust-2',
+        name: 'Shop B',
+        email: 'info@shopb.com',
+        phone: '+91 87654 32109',
+        address: 'Pune, Maharashtra',
+        totalPurchased: 42500,
+        lastOrder: '2024-07-16',
+      },
+    ];
+  });
+
+  const [loading, setLoading] = useState(() => customers.length === 0);
   const [showForm, setShowForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,16 +53,6 @@ export default function Customers() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-    const parsed = JSON.parse(userData);
-    setUser(parsed);
-  }, [navigate]);
-
   const showToast = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
@@ -41,44 +61,21 @@ export default function Customers() {
 
   const fetchCustomers = async () => {
     if (!user) return;
-    setLoading(true);
-    const storageKey = `khatabook_customers_${user.email || user.id}`;
+    if (customers.length === 0) setLoading(true);
+    const key = `khatabook_customers_${user.email || user.id}`;
     try {
       const res = await fetch(`${API_BASE}/customers?shopkeeperId=${user.shopkeeperId || user.id}`);
       const data = await res.json();
       if (res.ok) {
         setCustomers(data.data || []);
-        localStorage.setItem(storageKey, JSON.stringify(data.data || []));
+        localStorage.setItem(key, JSON.stringify(data.data || []));
       } else {
         throw new Error(data.error || 'Failed to fetch customers');
       }
     } catch (error) {
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem(key);
       if (saved) {
         setCustomers(JSON.parse(saved));
-      } else {
-        const defaultCusts = [
-          {
-            id: 'cust-1',
-            name: 'Retail Store A',
-            email: 'contact@retaila.com',
-            phone: '+91 98765 43210',
-            address: 'Bangalore, Karnataka',
-            totalPurchased: 65000,
-            lastOrder: '2024-07-18',
-          },
-          {
-            id: 'cust-2',
-            name: 'Shop B',
-            email: 'info@shopb.com',
-            phone: '+91 87654 32109',
-            address: 'Pune, Maharashtra',
-            totalPurchased: 42500,
-            lastOrder: '2024-07-16',
-          },
-        ];
-        setCustomers(defaultCusts);
-        localStorage.setItem(storageKey, JSON.stringify(defaultCusts));
       }
     } finally {
       setLoading(false);
@@ -104,7 +101,7 @@ export default function Customers() {
     e.preventDefault();
     if (!validate()) return;
 
-    const storageKey = `khatabook_customers_${user.email || user.id}`;
+    const key = `khatabook_customers_${user.email || user.id}`;
 
     try {
       const payload = {
@@ -138,7 +135,7 @@ export default function Customers() {
         updated = [...customers, { ...formData, id: `cust-${Date.now()}`, lastOrder: new Date().toISOString() }];
       }
       setCustomers(updated);
-      localStorage.setItem(storageKey, JSON.stringify(updated));
+      localStorage.setItem(key, JSON.stringify(updated));
       showToast(editingCustomer ? 'Customer updated' : 'Customer added');
       setShowForm(false);
       setEditingCustomer(null);
@@ -161,7 +158,7 @@ export default function Customers() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this customer?')) return;
 
-    const storageKey = `khatabook_customers_${user.email || user.id}`;
+    const key = `khatabook_customers_${user.email || user.id}`;
 
     try {
       await fetch(`${API_BASE}/customers/${id}`, { method: 'DELETE' });
@@ -170,7 +167,7 @@ export default function Customers() {
     } catch (error) {
       const updated = customers.filter((c) => c.id !== id);
       setCustomers(updated);
-      localStorage.setItem(storageKey, JSON.stringify(updated));
+      localStorage.setItem(key, JSON.stringify(updated));
       showToast('Customer deleted');
     }
   };
@@ -184,8 +181,7 @@ export default function Customers() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-12 transition-colors duration-200">
-      <Navbar user={user} />
+    <div className="pb-12">
 
       {toastMessage && (
         <div
